@@ -412,12 +412,20 @@ int main() {
                 scanf("%d", &PIN);
                 printf("Enter the amount to deposit: ");
                 scanf("%d", &deposit_amount);
-                int result = deposit(avl_root, account_no, PIN, deposit_amount);
-                if (result == 1)
+                struct AVLNode* result = deposit(avl_root, account_no, PIN, deposit_amount);
+
+                if (result == NULL) {
                     printf("Deposit successful. New balance: %d\n", avl_root->balance);
-                else if (result == -1)
-                    printf("Incorrect PIN. Deposit failed.\n");
+                } else {
+                    printf("Deposit failed: ");
+                    if (result->balance < deposit_amount) {
+                        printf("Insufficient balance.\n");
+                    } else {
+                        printf("Incorrect PIN.\n");
+                    }
+                }
                 break;
+
             }
             case 3: {
                 int account_no, PIN, withdraw_amount;
@@ -427,14 +435,20 @@ int main() {
                 scanf("%d", &PIN);
                 printf("Enter the amount to withdraw: ");
                 scanf("%d", &withdraw_amount);
-                int result = withdraw(avl_root, account_no, PIN, withdraw_amount);
-                if (result == 1)
+                struct AVLNode* result = withdraw(avl_root, account_no, PIN, withdraw_amount);
+
+                if (result == NULL) {
                     printf("Withdrawal successful. New balance: %d\n", avl_root->balance);
-                else if (result == -1)
-                    printf("Insufficient balance. Withdrawal failed.\n");
-                else if (result == -2)
-                    printf("Incorrect PIN. Withdrawal failed.\n");
+                } else {
+                    printf("Withdrawal failed: ");
+                    if (result->balance < withdraw_amount) {
+                        printf("Insufficient balance.\n");
+                    } else {
+                        printf("Incorrect PIN.\n");
+                    }
+                }
                 break;
+
             }
             case 4: {
                 int account_no;
