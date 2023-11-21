@@ -476,10 +476,11 @@ int main() {
                 scanf("%d", &PIN);
                 if(avl_root==NULL)
                 {
-                    printf("No records to delete");
+                    printf("No records to delete !!!");
                 }
                 else if (strcmp(cnic, avl_root->CNIC) == 0 && PIN == avl_root->PIN) {
                     avl_root = delete_Acc(avl_root, account_no);
+                    printf("Account Deleted Successfully !!!");
                 }
                 break;
             }
