@@ -218,14 +218,14 @@ int print_data(struct AVLNode* node, int account_no) {
     return 0;
 }
 
-void pre_order(struct AVLNode* node) {
+void in_order(struct AVLNode* node) {
     if (node->left != NULL) {
-        pre_order(node->left);
+        in_order(node->left);
     }
     printf("             %d            %s           %s                %c                %s             %d\n",
            node->Acc_Number, node->Name, node->CNIC, node->Gender, node->Type, node->balance);
     if (node->right != NULL) {
-        pre_order(node->right);
+        in_order(node->right);
     }
 }
 
@@ -247,7 +247,7 @@ struct AVLNode* deposit(struct AVLNode* node, int account_no, int PIN, int balan
             time(&t);
             char entry[100];
             snprintf(entry, sizeof(entry), "Deposited: %d on %s", balance, ctime(&t));
-            printf("Deposit successful. New balance: %d\n", node->balance);
+            // printf("Deposit successful. New balance: %d\n", node->balance);
             return NULL; // Deposit successful
         } else {
             printf("Incorrect PIN. Deposit failed.\n");
@@ -304,7 +304,7 @@ struct AVLNode* withdraw(struct AVLNode* node, int account_no, int PIN, int bala
                 time(&t);
                 char entry[100];
                 snprintf(entry, sizeof(entry), "Withdrawn: %d on %s", balance, ctime(&t));
-                printf("Withdrawal successful. New balance: %d\n", node->balance);
+                // printf("Withdrawal successful. New balance: %d\n", node->balance);
                 return NULL; // Withdrawal successful
             }
         } else {
@@ -472,7 +472,7 @@ int main() {
                     printf(" \n");
                     printf("        ####################################################################################################################################\n");
                     printf(" \n");
-                    pre_order(avl_root);
+                    in_order(avl_root);
                 }
                 else {
                     printf("No accounts found.\n");
