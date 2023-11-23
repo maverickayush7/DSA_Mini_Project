@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 
+
 // AVL Node
 struct AVLNode {
     char Name[50];
@@ -104,11 +105,13 @@ struct AVLNode* insert_Acc(struct AVLNode* node, char* name, char* cnic, char ge
 }
 
 
+
 struct AVLNode* delete_Acc(struct AVLNode* root, int account_no) {
     if (root == NULL) {
         return root;
     }
 
+    // Standard BST delete
     if (account_no < root->Acc_Number) {
         root->left = delete_Acc(root->left, account_no);
     } else if (account_no > root->Acc_Number) {
@@ -125,8 +128,7 @@ struct AVLNode* delete_Acc(struct AVLNode* root, int account_no) {
             return temp;
         }
 
-        // Node with two children: Get the inorder successor (smallest
-        // in the right subtree)
+        // Node with two children: Get the inorder successor (smallest in the right subtree)
         struct AVLNode* temp = root->right;
         while (temp->left != NULL) {
             temp = temp->left;
@@ -337,6 +339,9 @@ struct AVLNode* withdraw(struct AVLNode* node, int account_no, int PIN, int bala
     return node;
 }
 
+
+
+
 void displayTitle() {
     printf("                   ____              _      __  __                                                   _      _____           _                  \n");
     printf("                  |  _ \\            | |    |  \\/  |                                                 | |    / ____|         | |                 \n");
@@ -470,11 +475,11 @@ int main() {
                 scanf("%d", &PIN);
                 if(avl_root==NULL)
                 {
-                    printf("No records to delete !!!");
+                    printf("No records to delete");
                 }
                 else if (strcmp(cnic, avl_root->CNIC) == 0 && PIN == avl_root->PIN) {
                     avl_root = delete_Acc(avl_root, account_no);
-                    printf("Account is successfully deleted !!!");
+                    printf("\nAccount deleted successfully");
                 }
                 break;
             }
