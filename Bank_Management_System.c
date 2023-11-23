@@ -63,6 +63,7 @@ struct AVLNode* left_right_rotation(struct AVLNode* node) {
 
 struct AVLNode* insert_Acc(struct AVLNode* node, char* name, char* cnic, char gender, char* type, int account_no, int PIN, int balance) {
     if (node == NULL) {
+        // Account number should be assigned only when creating a new node
         node = (struct AVLNode*)malloc(sizeof(struct AVLNode));
         if (node == NULL) {
             printf("Memory allocation failed\n");
@@ -78,6 +79,7 @@ struct AVLNode* insert_Acc(struct AVLNode* node, char* name, char* cnic, char ge
         node->left = NULL;
         node->right = NULL;
         node->height = 0;
+        return node; // Return the new node
     } else if (account_no < node->Acc_Number) {
         node->left = insert_Acc(node->left, name, cnic, gender, type, account_no, PIN, balance);
         if (height(node->left) - height(node->right) == 2) {
@@ -218,37 +220,37 @@ int print_data(struct AVLNode* node, int account_no) {
     return 0;
 }
 
-void in_order(struct AVLNode* node) {
+void pre_order(struct AVLNode* node) {
     if (node->left != NULL) {
-        in_order(node->left);
+        pre_order(node->left);
     }
     printf("             %d            %s           %s                %c                %s             %d\n",
            node->Acc_Number, node->Name, node->CNIC, node->Gender, node->Type, node->balance);
     if (node->right != NULL) {
-        in_order(node->right);
+        pre_order(node->right);
     }
 }
 
-struct AVLNode* deposit(struct AVLNode* node, int account_no, int PIN, int balance) {
+struct AVLNode* deposit(struct AVLNode* node, int account_no, int PIN, int balance, struct tm *timeInfo) {
     if (node == NULL) {
         printf("Account not found. Deposit failed.\n");
         return NULL; // Account not found
     }
 
     if (account_no < node->Acc_Number) {
-        node->left = deposit(node->left, account_no, PIN, balance);
+        node->left = deposit(node->left, account_no, PIN, balance, timeInfo);
     } else if (account_no > node->Acc_Number) {
-        node->right = deposit(node->right, account_no, PIN, balance);
+        node->right = deposit(node->right, account_no, PIN, balance, timeInfo);
     } else {
         // Account found
         if (PIN == node->PIN) {
             node->balance += balance;
-            time_t t;
-            time(&t);
-            char entry[100];
-            snprintf(entry, sizeof(entry), "Deposited: %d on %s", balance, ctime(&t));
-            // printf("Deposit successful. New balance: %d\n", node->balance);
-            return NULL; // Deposit successful
+            printf("Deposit successful. New balance: %d\n", node->balance);
+            
+            // Print the time only when the deposit is successful
+            printf("\nDeposited on :\n");
+            printf("Date: %02d/%02d/%d\n", timeInfo->tm_mday, timeInfo->tm_mon + 1, timeInfo->tm_year + 1900);
+            printf("Time: %02d:%02d:%02d\n", timeInfo->tm_hour, timeInfo->tm_min, timeInfo->tm_sec);
         } else {
             printf("Incorrect PIN. Deposit failed.\n");
             return node;
@@ -282,16 +284,16 @@ struct AVLNode* deposit(struct AVLNode* node, int account_no, int PIN, int balan
     return node;
 }
 
-struct AVLNode* withdraw(struct AVLNode* node, int account_no, int PIN, int balance) {
+struct AVLNode* withdraw(struct AVLNode* node, int account_no, int PIN, int balance,struct tm *timeInfo) {
     if (node == NULL) {
         printf("Account not found. Withdrawal failed.\n");
         return NULL; // Account not found
     }
 
     if (account_no < node->Acc_Number) {
-        node->left = withdraw(node->left, account_no, PIN, balance);
+        node->left = withdraw(node->left, account_no, PIN, balance,timeInfo);
     } else if (account_no > node->Acc_Number) {
-        node->right = withdraw(node->right, account_no, PIN, balance);
+        node->right = withdraw(node->right, account_no, PIN, balance,timeInfo);
     } else {
         // Account found
         if (PIN == node->PIN) {
@@ -300,12 +302,10 @@ struct AVLNode* withdraw(struct AVLNode* node, int account_no, int PIN, int bala
                 return node; // Insufficient balance
             } else {
                 node->balance -= balance;
-                time_t t;
-                time(&t);
-                char entry[100];
-                snprintf(entry, sizeof(entry), "Withdrawn: %d on %s", balance, ctime(&t));
-                // printf("Withdrawal successful. New balance: %d\n", node->balance);
-                return NULL; // Withdrawal successful
+                printf("Withdrawal successful. New balance: %d\n", node->balance);
+                printf("\nWithdrawl on :");
+                printf("\nDate: %02d/%02d/%d\n", timeInfo->tm_mday, timeInfo->tm_mon + 1, timeInfo->tm_year + 1900);
+                printf("\nTime: %02d:%02d:%02d\n", timeInfo->tm_hour, timeInfo->tm_min, timeInfo->tm_sec);
             }
         } else {
             printf("Incorrect PIN. Withdrawal failed.\n");
@@ -337,8 +337,6 @@ struct AVLNode* withdraw(struct AVLNode* node, int account_no, int PIN, int bala
     return node;
 }
 
-
-
 void displayTitle() {
     printf("                   ____              _      __  __                                                   _      _____           _                  \n");
     printf("                  |  _ \\            | |    |  \\/  |                                                 | |    / ____|         | |                 \n");
@@ -353,6 +351,10 @@ void displayTitle() {
 
 int main() {
     int option, loop = 1;
+    time_t currentTime;
+    struct tm *timeInfo;
+    time(&currentTime);
+    timeInfo = localtime(&currentTime);
     while (loop) {
         displayTitle();
         printf(" \n");
@@ -369,11 +371,10 @@ int main() {
         printf(" \n");
 
         switch (option) {
-            case 1: {
-                char name[50], cnic[15], type[20];
+                        case 1: {
+                char name[50], cnic[15], type[20],gender;
                 int account_no, PIN;
-                float balance;
-                char gender;
+                float balance;  // Changed type to float
 
                 printf("Enter the following details for account creation:\n");
                 printf("Name: ");
@@ -387,7 +388,7 @@ int main() {
                 printf("Initial Deposit: ");
                 scanf("%f", &balance);
 
-                account_no = findMax(avl_root) + 1;  // Assign a new account number
+                account_no = findMax(avl_root) + 1;
 
                 printf("Enter a 4-digit PIN for the account: ");
                 scanf("%d", &PIN);
@@ -396,14 +397,14 @@ int main() {
 
                 printf("Account created successfully. Account Number: %d\n", account_no);
 
-                // Create a new log entry for account creation
                 time_t t;
                 time(&t);
                 char entry[100];
-                snprintf(entry, sizeof(entry), "Account Created with an initial deposit of %.2f on %s", balance, ctime(&t));
+                printf(entry, sizeof(entry), "Account Created with an initial deposit of %.2f on %s", balance, ctime(&t));
 
                 break;
             }
+
             case 2: {
                 int account_no, PIN, deposit_amount;
                 printf("Enter Account Number: ");
@@ -412,21 +413,11 @@ int main() {
                 scanf("%d", &PIN);
                 printf("Enter the amount to deposit: ");
                 scanf("%d", &deposit_amount);
-                struct AVLNode* result = deposit(avl_root, account_no, PIN, deposit_amount);
-
-                if (result == NULL) {
-                    printf("Deposit successful. New balance: %d\n", avl_root->balance);
-                } else {
-                    printf("Deposit failed: ");
-                    if (result->balance < deposit_amount) {
-                        printf("Insufficient balance.\n");
-                    } else {
-                        printf("Incorrect PIN.\n");
-                    }
-                }
+                avl_root = deposit(avl_root, account_no, PIN, deposit_amount,timeInfo);
+                
                 break;
-
             }
+
             case 3: {
                 int account_no, PIN, withdraw_amount;
                 printf("Enter Account Number: ");
@@ -435,21 +426,10 @@ int main() {
                 scanf("%d", &PIN);
                 printf("Enter the amount to withdraw: ");
                 scanf("%d", &withdraw_amount);
-                struct AVLNode* result = withdraw(avl_root, account_no, PIN, withdraw_amount);
-
-                if (result == NULL) {
-                    printf("Withdrawal successful. New balance: %d\n", avl_root->balance);
-                } else {
-                    printf("Withdrawal failed: ");
-                    if (result->balance < withdraw_amount) {
-                        printf("Insufficient balance.\n");
-                    } else {
-                        printf("Incorrect PIN.\n");
-                    }
-                }
+                avl_root = withdraw(avl_root, account_no, PIN, withdraw_amount,timeInfo);
                 break;
-
             }
+
             case 4: {
                 int account_no;
                 printf("Enter Account Number: ");
@@ -472,7 +452,7 @@ int main() {
                     printf(" \n");
                     printf("        ####################################################################################################################################\n");
                     printf(" \n");
-                    in_order(avl_root);
+                    pre_order(avl_root);
                 }
                 else {
                     printf("No accounts found.\n");
@@ -494,7 +474,7 @@ int main() {
                 }
                 else if (strcmp(cnic, avl_root->CNIC) == 0 && PIN == avl_root->PIN) {
                     avl_root = delete_Acc(avl_root, account_no);
-                    printf("Account Deleted Successfully !!!");
+                    printf("Account is successfully deleted !!!");
                 }
                 break;
             }
